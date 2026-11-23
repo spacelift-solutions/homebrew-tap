@@ -28,7 +28,7 @@ def verify(path, releases):
     if path.is_symlink() or not path.is_file():
         raise ValueError(f"{path}: expected a regular cask file")
     source = path.read_text()
-    if re.findall(r'^\s*version\s+"([^"]+)"\s*$', source, re.M) != [version]:
+    if re.findall(r"^[ \t]*version\b.*$", source, re.M) != [f'  version "{version}"']:
         raise ValueError(f"{path}: expected version {version} from the latest published release")
     assets = {asset["name"]: asset for asset in release["assets"]}
 
@@ -47,7 +47,7 @@ def verify(path, releases):
             stanza = f'    on_{cpu} do\n      sha256 "{digest[7:]}"\n      url "{url}"\n    end\n'
             if sections[0].count(stanza) != 1:
                 raise ValueError(f"{path}: {block}/{cpu} must use {archive} and its published SHA-256")
-    if len(re.findall(r"^\s*(?:sha256|url)\s+", source, re.M)) != 8:
+    if len(re.findall(r"^[ \t]*(?:sha256|url)\b", source, re.M)) != 8:
         raise ValueError(f"{path}: unexpected download directives outside the four generated platform entries")
     print(f"{path}: verified {version} and all four platform downloads")
 
